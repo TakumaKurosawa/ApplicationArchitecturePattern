@@ -1,0 +1,2 @@
+# ApplicationArchitecturePattern
+アプリケーションアーキテクチャパターン集
