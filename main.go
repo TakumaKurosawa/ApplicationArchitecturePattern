@@ -1,18 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
+
+	"github.com/TakumaKurosawa/ApplicationArchitecturePattern/external/infrastructure"
+	"github.com/TakumaKurosawa/ApplicationArchitecturePattern/external/presentation/httpserver"
+	"github.com/TakumaKurosawa/ApplicationArchitecturePattern/internal/application"
+	"github.com/TakumaKurosawa/ApplicationArchitecturePattern/internal/domain"
 )
 
 func main() {
-	http.HandleFunc("/todo/done", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Todo Done")
-	})
+	todoInfra := infrastructure.NewTodoInfra(infrastructure.ConnectDB())
+	todoDomain := domain.NewTodoDomainService(todoInfra)
+	todoApp := application.NewTodoUseApplication(todoDomain)
 
-	fmt.Println("Server is listening on port 8080...")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Println("Error:", err)
+	if err := httpserver.NewExecutor().Run(todoApp); err != nil {
+		log.Fatalf("HTTP server running Error:%v", err)
+
+		return
 	}
 }
