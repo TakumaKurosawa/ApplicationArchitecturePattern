@@ -4,12 +4,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/TakumaKurosawa/ApplicationArchitecturePattern/domain"
+	"github.com/TakumaKurosawa/ApplicationArchitecturePattern/handler"
+	"github.com/TakumaKurosawa/ApplicationArchitecturePattern/infra"
+	"github.com/TakumaKurosawa/ApplicationArchitecturePattern/usecase"
 )
 
 func main() {
-	http.HandleFunc("/todo/done", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Todo Done")
-	})
+	todoRepo := infra.NewTodoRepository(infra.ConnectDB())
+	todoD := domain.NewTodoDomain(todoRepo)
+	todoU := usecase.NewTodoUseCase(todoD)
+	todoH := handler.NewTodoHandler(todoU)
+
+	http.HandleFunc("/todo/done", todoH.ChangeTodoStatus)
 
 	fmt.Println("Server is listening on port 8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
